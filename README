@@ -14,3 +14,21 @@ git init thememap_sserv
 
 #rename master to main
 git config --global init.defaultBranch main
+
+#Copy my readme into the thememap_sserv dir
+cp README ./thememap_sserv/
+
+#add stuff and commit
+cd thememap_sserv
+cat > hello.txt
+Hello World, GIT Repo created!
+
+git add hello.txt 
+git add README 
+git commit -m "Adding readme & hello"
+
+#ok now I need to push this up to my github repo
+git remote add origin https://github.com/cstorer1/thememap_sserv.git
+git branch -M main
+git push -u origin main
+
