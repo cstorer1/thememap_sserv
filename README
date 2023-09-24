@@ -1,0 +1,16 @@
+#2023.09.23
+#Chad Storer
+#
+#In this project I will build a Shiny server to run the ThemeMap application in support of CompBio
+#Learn more about CompBio here:  https://becker.wustl.edu/resources/software/compbio/
+
+#The ThemeMap application will act as a conduit between the themes generated in CompBio and the users omics data set
+#allowing generation of various visualizations made through the lens of CompoBio Themes.
+
+#The first visualization will be heatmaps using the ComplexHeatmap package.
+
+#creating the git repository
+git init thememap_sserv
+
+#rename master to main
+git config --global init.defaultBranch main
