@@ -1,0 +1,24 @@
+#2023.08.24
+#Chad Storer
+#Learning how to incorporate rhino into my shiny server for good coding practices 
+#(In other words, forcing me to be a grown-up)
+
+#Working in:
+#cstorer@at-3:/huge1/cstorer/ThemeMap/thememap_sserv/
+
+#initialize the project
+#rhino::init("RhinoApplication")  #only the first time
+
+#set my working directory;  This needs to be set because rhino won't do it for you
+setwd("./RhinoApplication")
+
+#now run the application.
+#note that the default 127.0.0.1 is for local access only
+#it took a bit to figure out but you need to specify  0.0.0.0
+#for clients to connect.  This is kind of the whole point, so I 
+#would have thought this would have been more obvious or mentioned 
+#in the errors somewhere, but I digress.  Also I am specifying
+#the port and telling the app not to try to launch a browser
+#window because, well, I am in a unix commandline env.
+
+shiny::runApp(launch.browser = FALSE, port = 3839, host = getOption("shiny.host", "0.0.0.0"))
