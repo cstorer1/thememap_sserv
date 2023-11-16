@@ -10,7 +10,7 @@ uploadUI <- function(id) {
   ns <- NS(id)
 
   tagList(
-    #fileInput(ns("up_file"), NULL, buttonLabel = "Upload...", multiple = TRUE),
+    fileInput(ns("up_file"), NULL, buttonLabel = "Upload...", multiple = TRUE),
     tableOutput(ns("up_table")),
     #plotOutput(ns("up_plot"))
     textOutput(ns("my_file"))

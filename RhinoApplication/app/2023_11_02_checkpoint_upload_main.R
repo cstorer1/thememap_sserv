@@ -7,8 +7,7 @@ box::use(
   #shiny [NS, moduleServer, fluidRow, icon, h1], 
   shiny[...],
   semantic.dashboard [dashboardPage, dashboardHeader, 
-  dashboardSidebar, sidebarMenu, menuItem, dashboardBody],
-  DT[...]
+  dashboardSidebar, sidebarMenu, menuItem, dashboardBody]
 )
 
 box::use(
@@ -28,42 +27,22 @@ ui <- function(id) {
     ), side = "top", visible = FALSE),
     dashboardBody(
       fluidRow(
-        fileInput(ns("dataFile"), NULL, buttonLabel = "Upload...", multiple = FALSE),
-	
-	#verbatimTextOutput(ns("test0")), #<-----DEBUG
-        #verbatimTextOutput(ns("test1")), #<-----DEBUG
-
-	selectInput(ns("col_fun"), label = "",
-        choices = list("BloodMoon" = "col_fun1", 
-		       "Yellowjacket" = "col_fun2", 
-		       "Peonies" = "col_fun3", 
-		       "Mardis Gras" = "col_fun4"), 
-        selected = "col_fun1"),
-	
-	#verbatimTextOutput(ns("test2")), #<-----DEBUG
-	#verbatimTextOutput(ns("test3")), #<-----DEBUG
-
+        fileInput(ns("dataFile"), NULL, buttonLabel = "Upload...", multiple = TRUE),
+	tableOutput(ns("fileTable")),
 	hmap$hmapUI(ns("hmap"))
-      ),
+      )
     )
-   ) 
+   )
 }
 
 #' @export
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     output$fileTable <- renderTable(input$dataFile)
-
+    		       
     common <- reactiveValues( my_path = "" )
     observeEvent(input$dataFile, { common$my_path <- input$dataFile$datapath })
-    #output$test0 <- (renderPrint({common$my_path}) )         #<-------DEBUG
-    #output$test1 <- renderPrint(typeof(({common$my_path}) )) #<-------DEBUG
 
-    common <- reactiveValues ( my_col = "" )
-    observeEvent(input$col_fun, { common$my_col <- input$col_fun })
-    #output$test2 <- (renderPrint({common$my_col}) )         #<-------DEBUG
-    #output$test3 <- renderPrint(typeof(({common$my_col}) )) #<-------DEBUG
-    
     hmap$hmapServer("hmap", common)
   })
 }
