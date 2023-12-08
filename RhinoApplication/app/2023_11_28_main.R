@@ -28,19 +28,17 @@ ui <- function(id) {
     ), side = "top", visible = FALSE),
     dashboardBody(
       fluidRow(
-	titlePanel(title=div(img(src = "static/images/toy_data.png", width="400px", height="200px"), h3("Example Data Format", align="center"))),
+	titlePanel(title=div(img(src = "static/images/toy_data.png", width="300px", height="150px"), h3("Example Data Format", align="center"))),
         fileInput(ns("dataFile"), NULL, buttonLabel = "Upload:", multiple = FALSE),	
 	
 	selectInput(ns("col_fun"), label = "",
         choices = list("BloodMoon" = "col_fun1", 
 		       "Yellowjacket" = "col_fun2", 
 		       "Poppies" = "col_fun3", 
-		       "Mardis Gras" = "col_fun4",
-		       "Inverse_BMoon" = "col_fun5"), 
+		       "Mardis Gras" = "col_fun4"), 
         selected = "col_fun1"),
 	
-	hmap$hmapUI(ns("hmap")),
-	#textInput(ns("myURL"), "Passed Argument", "")  #<-------UNDER CONSTRUCTION
+	hmap$hmapUI(ns("hmap"))
       ),
     )
    ) 
@@ -57,21 +55,7 @@ server <- function(id) {
     common <- reactiveValues ( my_col = "" )
     observeEvent(input$col_fun, { common$my_col <- input$col_fun })    
    
-    common <- reactiveValues ( myURL = "")    				#<-------UNDER CONSTRUCTION
-    observe({                                                  		#<-------UNDER CONSTRUCTION
-      common$myURL <- parseQueryString(session$clientData$url_search)	#<-------UNDER CONSTRUCTION
-    })									#<-------UNDER CONSTRUCTION
-
-
-    
     hmap$hmapServer("hmap", common)
-  
-    #observe({							#<----Preliminary URL recieve code
-    #  query <- parseQueryString(session$clientData$url_search)
-    #  if (!is.null(query[['myURL']])) {
-    #    updateTextInput(session, "myURL", value = query[['myURL']])
-    #    }
-    #  })
   })
 }
 

@@ -23,7 +23,7 @@ hmapUI <- function(id) {
 	ns <- NS(id)
 	tagList(
 	   plotOutput(ns("up_plot"))			
-	   #,verbatimTextOutput(ns("test_url"))  	#<---------------------Debug!!
+	   ,verbatimTextOutput(ns("test_url"))  	#<---------------------Debug!!
 	)
 }
 
@@ -33,28 +33,38 @@ hmapServer <- function(id, common) {
   #get values from common		      
   up_file_path 	<- reactive({ common$my_path }) 	#location of uploaded file
   my_col_fun 	<- reactive({ common$my_col })    	#color option	
-  my_URL        <- reactive({ paste("/var/www/html/", common$myURL, sep="") })		
+  
+  my_URL        <- reactive({ paste("/var/www/html/", common$myURL, sep="") })		#<---------------------UNDER CONSTRUCTION, theme_dat file	
+  output$test_url <- (renderPrint ({ paste("/var/www/html/", common$myURL, sep="") }) )	#<---------------------UNDER CONSTRUCTION, passes to ui, DEBUG
+  mytest        <- (renderPrint ({ paste("/var/www/html/", common$myURL, sep="") }) ) #<---------------------UNDER CONSTRUCTION
+
+  #get CompBio export data									#<---------------------UNDER CONSTRUCTION
+  
+  #theme_dat <- read.table( paste("/var/www/html/", "temp/STORER_beech_laz_pos_tt_656d3f9297ac2.csv", sep=""), header=F, stringsAsFactors=F)#<--UNDER CONSTRUCTION
+  theme_dat <- read.table( mytest(), header=F, stringsAsFactors=F)			#<--UNDER CONSTRUCTION
+      
+  #theme_dat <- read.table(mytest, header=F, stringsAsFactors=F)			#<---------Doesn't work
+  #theme_dat <- eventReactive({ read.table(mytest, header=F, stringsAsFactors=F)  })	#<---------Doesn't work
+
+  
+  
+  theme_dat <- theme_dat[-1:-7,]                                        #<---------------------UNDER CONSTRUCTION
+  theme_dat <- as.data.frame(theme_dat)					#<---------------------UNDER CONSTRUCTION
+  
+
+  export <- theme_dat %>%								#<---------------------UNDER CONSTRUCTION
+        filter( grepl("Entity", theme_dat)) %>%						#<---------------------UNDER CONSTRUCTION
+        mutate(across('theme_dat', \(x) str_replace(x, 'Entity=\\(e\\)', ''))) %>%	#<---------------------UNDER CONSTRUCTION
+        mutate(across('theme_dat', \(x) str_replace(x, '\\(.*', '')))			#<---------------------UNDER CONSTRUCTION
+  theme_list <- append(export$theme_dat, c('group', 'gene_id'), after=0)		#<---------------------UNDER CONSTRUCTION
+  
 
   output$up_plot <- renderPlot({
 	req( up_file_path() )
-	req( my_URL() )									
 	
-	theme_dat <- read.table( my_URL(), header=FALSE, sep="\t")
-	theme_dat <- theme_dat[-1:-7,]
-	theme_dat <- as.data.frame(theme_dat)
-
-	export <- theme_dat %>%
-		filter( grepl("Entity", theme_dat)) %>%
-		mutate(across('theme_dat', \(x) str_replace(x, 'Entity=\\(e\\)', ''))) %>%
-		mutate(across('theme_dat', \(x) str_replace(x, '\\(.*', '')))
-	theme_list <- append(export$theme_dat, c('group', 'gene_id'), after=0)
-	
-	leng_list <- length(theme_list)
-	if(leng_list > 17){ theme_list <- theme_list[1:17] }
-
-
-	big_dat <- read.table( up_file_path(), header=FALSE, sep="\t") 			
-	dat <- big_dat %>% filter(big_dat$V1 %in% theme_list)				
+	#dat <- read.table( up_file_path(), header=FALSE, sep="\t") #long/skinny don't read header
+	big_dat <- read.table( up_file_path(), header=FALSE, sep="\t") 			#<---------------------UNDER CONSTRUCTION
+	dat <- big_dat %>% filter(big_dat$V1 %in% theme_list)				#<---------------------UNDER CONSTRUCTION
 
 	ncol <- ncol(dat)
 
@@ -74,23 +84,23 @@ hmapServer <- function(id, common) {
 	#add row names
 	rownames(dat) <- rownames
 
+
 	tmat <- dat #<-------------hack to fit old code for now
+
 
 	#get data range:
 	tmat_max <- round( max(tmat), digits = 3)
-        tmat_min <- round( min(tmat), digits = 3)
-        tmat_range <- round( (tmat_max - tmat_min), digits = 3)
-        tmat_50 <- round( (0.50 * tmat_range), digits = 3)
-        tmat_25 <- round( (0.25 * tmat_range), digits = 3)
+	tmat_min <- round( min(tmat), digits = 3)
+	tmat_range <- round( (tmat_max - tmat_min), digits = 3)
+	tmat_50 <- round( (0.50 * tmat_range), digits = 3)
+	tmat_25 <- round( (0.25 * tmat_range), digits = 3)
 
         #color function for scaled expression:
         col_fun1 = colorRamp2(c(tmat_min, tmat_max), c("black", "red"))  				#aka bloodmoon
         col_fun2 = colorRamp2(c(tmat_min, tmat_max), c("black", "yellow"))				#aka yellowjacket
         col_fun3 = colorRamp2(c(tmat_min, tmat_max), c( "ivory2",  "red3"))  				#aka poppies
 	col_fun4 = colorRamp2(c(tmat_min, tmat_50, tmat_max), c("purple", "green2", "yellow"))          #aka mardis gras
-        col_fun5 = colorRamp2(c(tmat_min, tmat_max), c("red", "black"))                                 #aka inverse_bloodmoon
-
-        
+        col_fun5 = colorRamp2(c(tmat_min, tmat_max), c("red", "black"))                 		#aka inverse_bloodmoon
 
         col_ha = columnAnnotation(
                 column_group = anno_block(gp = gpar(fill = c("black", "darkgreen", "darkblue", "orange", "gold")),
@@ -106,15 +116,15 @@ hmapServer <- function(id, common) {
 
 	ht = Heatmap(tmat, name = "Delta Delta Values", 
 		col <- my_col ,           #<-----Now assign "my_col" to the col attribute
-                cluster_rows = TRUE,
+                cluster_rows = FALSE,
                 cluster_columns = TRUE,
                 column_title = "CompBio Heatmap",
                 column_names_side = "top",
                 column_title_side = "top",
                 show_column_names = F,
-                width = unit(40, "cm"),
+                width = unit(20, "cm"),
                 #height = unit(4, "cm"),
-		height = unit(0.63*nrow(dat), "cm"),
+		height = unit(0.65*nrow(dat), "cm"),
                 column_split = factor(groups, levels = unique(groups) ),
                 cluster_row_slices = FALSE,
                 cluster_column_slices = FALSE,
